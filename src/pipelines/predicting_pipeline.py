@@ -46,9 +46,9 @@ class Predictor:
 # --- Example Usage ---
 if __name__ == "__main__":
     # Update this path to your best checkpoint
-    CKPT_PATH = "models/checkpoints/last.ckpt" 
-    IMAGE_TO_TEST = "dataset/raw/yes/Y1.jpg" # Path to an MRI image
-
+    CKPT_PATH = "models/checkpoints/brain-tumor-epoch=03-val_f1=0.94.ckpt" 
+    # IMAGE_TO_TEST = "test/test_image.webp" # Path to an MRI image
+    IMAGE_TO_TEST = "test/test_no_tumor.webp" # Path to an MRI image
     predictor = Predictor(CKPT_PATH)
     prediction = predictor.predict(IMAGE_TO_TEST)
 

@@ -22,9 +22,30 @@ class Predictor:
         # Class names (ImageFolder usually sorts them alphabetically: 'no', 'yes')
         self.classes = ["no", "yes"]
 
-    def predict(self, image_path):
+    def predict_url(self, image_path):
         # 3. Load and transform the image
         img = Image.open(image_path).convert("RGB")
+        img_tensor = self.transform(img).unsqueeze(0) # Add batch dimension (1, 3, 128, 128)
+
+        img_tensor = img_tensor.to(self.model.device) # Move to same device as model (CPU or GPU)
+        # 4. Forward pass
+        logits = self.model(img_tensor)
+        
+        # 5. Get probabilities and predicted class
+        probs = F.softmax(logits, dim=1)
+        conf, pred_idx = torch.max(probs, dim=1)
+
+        result = {
+            "prediction": self.classes[pred_idx.item()],
+            "confidence": conf.item(),
+            "probabilities": {self.classes[i]: probs[0][i].item() for i in range(len(self.classes))}
+        }
+        
+        return result
+    
+    def predict_image(self, image: Image.Image):
+        # 3. Load and transform the image
+        img = image.convert("RGB")
         img_tensor = self.transform(img).unsqueeze(0) # Add batch dimension (1, 3, 128, 128)
 
         img_tensor = img_tensor.to(self.model.device) # Move to same device as model (CPU or GPU)
@@ -50,7 +71,7 @@ if __name__ == "__main__":
     # IMAGE_TO_TEST = "test/test_image.webp" # Path to an MRI image
     IMAGE_TO_TEST = "test/test_no_tumor.webp" # Path to an MRI image
     predictor = Predictor(CKPT_PATH)
-    prediction = predictor.predict(IMAGE_TO_TEST)
+    prediction = predictor.predict_url(IMAGE_TO_TEST)
 
     print(f"\nResult for {IMAGE_TO_TEST}:")
     print(f"Prediction: {prediction['prediction'].upper()}")
